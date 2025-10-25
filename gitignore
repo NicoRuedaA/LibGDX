@@ -1,0 +1,27 @@
+# --- Gradle / Build ---
+# Directorio de trabajo de Gradle
+.gradle/
+
+# Directorios de salida de compilación (el más importante)
+*/build/
+
+# --- IDE: IntelliJ ---
+# Configuración específica del usuario
+.idea/
+
+# Archivos de módulos de IntelliJ
+*.iml
+*.ipr
+*.iws
+
+# --- Android ---
+# Contiene la ruta al SDK local, NUNCA debe subirse
+local.properties
+
+# --- Archivos del Sistema Operativo ---
+.DS_Store
+Thumbs.db
+
+# --- Archivos de Log y compilados ---
+*.log
+*.class
