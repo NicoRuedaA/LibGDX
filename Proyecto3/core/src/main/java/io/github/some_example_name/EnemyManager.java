@@ -2,65 +2,49 @@ package io.github.some_example_name;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+
 import java.util.ArrayList;
-import java.util.Random;
+
+import com.badlogic.gdx.math.MathUtils;
+import java.util.List;
 
 public class EnemyManager {
-    private ArrayList<Enemy> enemies;
-    private float spawnTimer;
-    private float spawnInterval = 1.5f; // 3 segundos
-    private Texture enemyTexture;
-    private Random random;
 
-    private float screenWidth;
-    private float screenHeight;
+    private List<Enemy> enemies;
+    private int screenWidth, screenHeight;
 
-    public EnemyManager(Texture texture, float screenWidth, float screenHeight) {
-        enemies = new ArrayList<>();
-        spawnTimer = 0;
-        enemyTexture = texture;
-        random = new Random();
+    public EnemyManager(int screenWidth, int screenHeight) {
         this.screenWidth = screenWidth;
         this.screenHeight = screenHeight;
+        enemies = new ArrayList<>();
     }
 
-    public void update(float deltaTime, Vector2 playerPosition) {
-        // Actualizar timer y crear enemigo si corresponde
-        spawnTimer += deltaTime;
-        if (spawnTimer >= spawnInterval) {
-            spawnTimer = 0;
-            spawnEnemy();
-        }
-
-        // Actualizar enemigos
-        for (Enemy enemy : enemies) {
-            enemy.update(deltaTime, playerPosition);
-        }
+    public void spawnEnemy() {
+        float x = MathUtils.random(0, screenWidth);
+        float y = MathUtils.random(0, screenHeight);
+        float speed = MathUtils.random(50, 150);
+        enemies.add(new Enemy(x, y, speed));
     }
 
-    public void render(SpriteBatch batch) {
-        for (Enemy enemy : enemies) {
-            enemy.render(batch);
+    public void update(float delta, Vector2 playerPosition) {
+        for (Enemy e : enemies) {
+            e.update(delta, playerPosition);
         }
     }
 
-    private void spawnEnemy() {
-        float x = 0, y = 0;
-
-        // Elegir una esquina aleatoria
-        int corner = random.nextInt(4);
-        switch (corner) {
-            case 0: x = 0; y = 0; break; // esquina inferior izquierda
-            case 1: x = screenWidth - enemyTexture.getWidth(); y = 0; break; // esquina inferior derecha
-            case 2: x = 0; y = screenHeight - enemyTexture.getHeight(); break; // esquina superior izquierda
-            case 3: x = screenWidth - enemyTexture.getWidth(); y = screenHeight - enemyTexture.getHeight(); break; // esquina superior derecha
+    public void render(com.badlogic.gdx.graphics.g2d.SpriteBatch batch) {
+        for (Enemy e : enemies) {
+            e.render(batch);
         }
-
-        enemies.add(new Enemy(x, y, 100f, enemyTexture)); // velocidad 100
     }
 
-    public ArrayList<Enemy> getEnemies() {
+    public List<Enemy> getEnemies() {
         return enemies;
+    }
+
+    public void dispose() {
+        for (Enemy e : enemies) {
+            e.dispose();
+        }
     }
 }
