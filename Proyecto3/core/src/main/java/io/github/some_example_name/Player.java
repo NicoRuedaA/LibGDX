@@ -21,13 +21,18 @@ public class Player {
     public PlayerAnimation animation;
 
     private int health;
+    private int starterHealth = 1;
+
+    private int currentExp;
+    private int expToLevelUp;
 
     public Player(Vector2 startPos) {
         position = startPos;
         animation = new PlayerAnimation("player_spritesheet.png", 5, 4);
         this.shootTimer = 0f;
-        this.health = 3;
-
+        this.health = starterHealth;
+        this.currentExp = 0;
+        this.expToLevelUp = 10;
     }
 
     public void update(float delta) {
@@ -118,6 +123,30 @@ public class Player {
 
     public int getHealth() {
         return this.health;
+    }
+
+    public void addExp(int amount) {
+        this.currentExp += amount;
+
+        //uso while ne vez de if por si un enemigo diera mucha EXP para subir muchos niveles de golpe
+        while(this.currentExp>=expToLevelUp){
+            this.health += 1;
+            int spilloverExp = this.currentExp - this.expToLevelUp;
+
+            this.expToLevelUp += 1;
+            this.currentExp = spilloverExp;
+        }
+
+        // (En el futuro, aquí comprobaríamos si sube de nivel)
+        // if (this.currentExp >= this.expToLevelUp) { ... }
+    }
+
+    public int getCurrentExp() {
+        return this.currentExp;
+    }
+
+    public int getExpToLevelUp() {
+        return this.expToLevelUp;
     }
 
 }

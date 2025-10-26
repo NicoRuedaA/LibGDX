@@ -2,6 +2,8 @@ package io.github.some_example_name;
 
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.viewport.Viewport; // 👈 Puede que necesites este import
+import com.badlogic.gdx.utils.viewport.FitViewport;
 
 public class CameraController {
     private OrthographicCamera camera;
@@ -40,5 +42,15 @@ public class CameraController {
 
     private float clamp(float value, float min, float max) {
         return Math.max(min, Math.min(max, value));
+    }
+
+    public void resize(int width, int height) {
+        // Si usas un Viewport (lo más probable):
+        // viewport.update(width, height);
+
+        // Si NO usas un Viewport y solo tienes una cámara:
+        camera.viewportWidth = width;
+        camera.viewportHeight = height;
+        camera.update();
     }
 }

@@ -3,6 +3,7 @@ package io.github.some_example_name;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 
 public class UIManager {
 
@@ -10,6 +11,9 @@ public class UIManager {
     private float heartSize = 32f;     // Tamaño del corazón en píxeles
     private float heartSpacing = 5f; // Espacio entre corazones
     private float margin = 10f;        // Margen desde la esquina de la pantalla
+    private BitmapFont font;
+    private float heartY = 0;
+
 
     public UIManager() {
         // Cargar la textura del corazón
@@ -18,6 +22,7 @@ public class UIManager {
         } catch (Exception e) {
             Gdx.app.error("UIManager", "No se pudo cargar 'hearth.png'", e);
         }
+        font = new BitmapFont();
     }
 
     /**
@@ -25,7 +30,7 @@ public class UIManager {
      * @param batch El SpriteBatch para dibujar.
      * @param currentHealth La vida actual del jugador.
      */
-    public void render(SpriteBatch batch, int currentHealth) {
+    public void render(SpriteBatch batch, int currentHealth, int currentExp, int expToLevelUp) {
         if (heartTexture == null) return; // No dibujar si la textura falló al cargar
 
         // Dibuja un corazón por cada punto de vida
@@ -40,9 +45,17 @@ public class UIManager {
             // Calculamos la posición Y (fija)
             // Gdx.graphics.getHeight() nos da el alto de la VENTANA
             // Restamos para ir hacia abajo desde la esquina superior
-            float y = Gdx.graphics.getHeight() - heartSize - margin;
+            heartY = Gdx.graphics.getHeight() - heartSize - margin;
+            float y = heartY;
 
             batch.draw(heartTexture, x, y, heartSize, heartSize);
+        }
+
+        String expText = "EXP: " + currentExp + " / " + expToLevelUp;
+        float textY = heartY - heartSpacing;
+
+        if (font != null) {
+            font.draw(batch, expText, margin, textY);
         }
     }
 
@@ -52,6 +65,9 @@ public class UIManager {
     public void dispose() {
         if (heartTexture != null) {
             heartTexture.dispose();
+        }
+        if (font != null) {
+            font.dispose(); // <-- ¡Importante liberar la fuente!
         }
     }
 }
