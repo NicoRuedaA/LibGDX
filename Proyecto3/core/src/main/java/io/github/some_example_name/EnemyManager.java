@@ -47,4 +47,13 @@ public class EnemyManager {
             e.dispose();
         }
     }
+
+    public void clearAll() {
+        // Primero, liberamos la memoria de cada enemigo
+        for (Enemy e : enemies) {
+            e.dispose();
+        }
+        // Luego, vaciamos la lista
+        enemies.clear();
+    }
 }

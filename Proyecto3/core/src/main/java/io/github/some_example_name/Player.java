@@ -25,14 +25,31 @@ public class Player {
 
     private int currentExp;
     private int expToLevelUp;
+    private int expIncreaseAmount;
+
+    private int projectilesPerShot;     // Cuántas balas por ráfaga (empezará en 1)
+    private float burstDelay;           // El delay que pediste (0.1s entre balas)
+    private float burstTimer;           // Temporizador para el burstDelay
+    private int projectilesFiredInBurst; // Contador de cuántas balas hemos disparado en la ráfaga actual
+
+    private Vector2 startPosition;
 
     public Player(Vector2 startPos) {
-        position = startPos;
+        this.position = startPos.cpy();
+        this.startPosition = startPos.cpy();
+
         animation = new PlayerAnimation("player_spritesheet.png", 5, 4);
         this.shootTimer = 0f;
         this.health = starterHealth;
         this.currentExp = 0;
         this.expToLevelUp = 10;
+        this.expIncreaseAmount = 1;
+
+        this.shootTimer = 0f;
+        this.projectilesPerShot = 1; // Empieza disparando 1 bala
+        this.burstDelay = 0.1f;      // 0.1 segundos entre balas (puedes ajustarlo)
+        this.burstTimer = 0f;
+        this.projectilesFiredInBurst = 0;
     }
 
     public void update(float delta) {
@@ -73,6 +90,7 @@ public class Player {
         }
 
         shootTimer += delta;
+        burstTimer += delta;
     }
 
     public void render(SpriteBatch batch) {
@@ -92,25 +110,37 @@ public class Player {
 
     public void shoot(List<Projectile> projectiles, CameraController camera) {
         if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
-// 2. ¡Añade esta comprobación!
-            // ¿Ha pasado suficiente tiempo desde el último disparo?
+
+            // 2. ¿Está listo el cooldown principal?
             if (shootTimer >= shootDelay) {
-
-                // --- (Este es tu código de disparo de antes) ---
-                Vector3 mouseWorld = camera.getCamera().unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
-                Vector2 mousePos = new Vector2(mouseWorld.x, mouseWorld.y);
-                Vector2 startPos = this.position.cpy();
-                Vector2 direction = mousePos.sub(startPos).nor();
-
-                projectiles.add(new Projectile(startPos, direction));
-                // --- (Fin del código de disparo) ---
-
-                // 3. ¡Resetea el temporizador!
-                shootTimer = 0f;
+                // ¡Sí! Iniciar una nueva ráfaga
+                shootTimer = 0f; // Reiniciar cooldown principal
+                projectilesFiredInBurst = 0; // Empezar ráfaga desde 0
+                burstTimer = burstDelay; // ¡Importante! Pone el timer listo para disparar la primera bala INMEDIATAMENTE
             }
-            // Si el 'shootTimer' es menor que 'shootDelay', no hará nada
-            // y el jugador tendrá que esperar.
         }
+
+        // 3. ¿Estamos EN MEDIO de una ráfaga?
+        //    (Esto se comprueba fuera del 'if (isButtonPressed)' para que la ráfaga
+        //    se complete aunque el jugador suelte el botón)
+        if (projectilesFiredInBurst < projectilesPerShot && burstTimer >= burstDelay) {
+
+            // ¡Sí! Disparar la siguiente bala de la ráfaga
+            projectilesFiredInBurst++; // Contamos esta bala
+            burstTimer = 0f; // Reiniciamos el timer de la ráfaga
+
+            // Llamamos a la función que crea la bala
+            fireOneProjectile(projectiles, camera);
+        }
+    }
+
+    private void fireOneProjectile(List<Projectile> projectiles, CameraController camera) {
+        Vector3 mouseWorld = camera.getCamera().unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
+        Vector2 mousePos = new Vector2(mouseWorld.x, mouseWorld.y);
+        Vector2 startPos = this.position.cpy();
+        Vector2 direction = mousePos.sub(startPos).nor();
+
+        projectiles.add(new Projectile(startPos, direction));
     }
 
     public void dispose() {
@@ -125,20 +155,23 @@ public class Player {
         return this.health;
     }
 
-    public void addExp(int amount) {
+    public boolean addExp(int amount) {
         this.currentExp += amount;
 
-        //uso while ne vez de if por si un enemigo diera mucha EXP para subir muchos niveles de golpe
-        while(this.currentExp>=expToLevelUp){
-            this.health += 1;
+        while (this.currentExp >= this.expToLevelUp) {
+            // ¡LEVEL UP!
             int spilloverExp = this.currentExp - this.expToLevelUp;
-
-            this.expToLevelUp += 1;
+            this.expToLevelUp += this.expIncreaseAmount;
             this.currentExp = spilloverExp;
+
+            // --- ¡CAMBIO IMPORTANTE! ---
+            // Ya no añadimos vida aquí.
+            // this.health += 1;  // <-- BORRA ESTA LÍNEA
+
+            return true; // <-- AÑADE ESTO: Notifica a GameScreen
         }
 
-        // (En el futuro, aquí comprobaríamos si sube de nivel)
-        // if (this.currentExp >= this.expToLevelUp) { ... }
+        return false; // No ha subido de nivel
     }
 
     public int getCurrentExp() {
@@ -148,5 +181,35 @@ public class Player {
     public int getExpToLevelUp() {
         return this.expToLevelUp;
     }
+
+    public void takeDamage(int amount) {
+        this.health -= amount;
+        if (this.health < 0) {
+            this.health = 0;
+        }
+    }
+
+    public boolean isAlive() {
+        return this.health > 0;
+    }
+
+    public void resetPosition() {
+        this.position.set(startPosition);
+    }
+
+    public void applyHealthUpgrade() {
+        this.health += 1;
+    }
+
+    /**
+     * Aplica la mejora de proyectil (llamado por GameScreen).
+     */
+    public void applyProjectileUpgrade() {
+        // ¡Aquí está tu nueva funcionalidad!
+        this.projectilesPerShot++; // Ahora disparará 2 (o 3, o 4...)
+        Gdx.app.log("Player", "Mejora de Proyectil! Disparando " + projectilesPerShot + " balas.");
+    }
+
+
 
 }

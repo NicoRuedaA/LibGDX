@@ -33,6 +33,8 @@ public class UIManager {
     public void render(SpriteBatch batch, int currentHealth, int currentExp, int expToLevelUp) {
         if (heartTexture == null) return; // No dibujar si la textura falló al cargar
 
+        heartY = Gdx.graphics.getHeight() - heartSize - margin;
+
         // Dibuja un corazón por cada punto de vida
         for (int i = 0; i < currentHealth; i++) {
 
@@ -45,10 +47,11 @@ public class UIManager {
             // Calculamos la posición Y (fija)
             // Gdx.graphics.getHeight() nos da el alto de la VENTANA
             // Restamos para ir hacia abajo desde la esquina superior
-            heartY = Gdx.graphics.getHeight() - heartSize - margin;
-            float y = heartY;
 
-            batch.draw(heartTexture, x, y, heartSize, heartSize);
+            //float y = heartY;
+
+            //batch.draw(heartTexture, x, y, heartSize, heartSize);
+            batch.draw(heartTexture, x, heartY, heartSize, heartSize);
         }
 
         String expText = "EXP: " + currentExp + " / " + expToLevelUp;
