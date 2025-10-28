@@ -18,7 +18,7 @@ import java.util.List;
  * Esta es la pantalla principal del juego.
  * Implementa 'Screen' y es controlada por 'Proyecto3Game'.
  */
-public class GameScreen implements Screen {
+public class InGame implements Screen {
 
     // --- Referencias de Juego ---
     private Proyecto3Game game;
@@ -45,12 +45,11 @@ public class GameScreen implements Screen {
     private float spawnInterval = 0.5f;
 
 
-
     /**
      * Constructor de la pantalla de juego.
      * Aquí se inicializa todo lo necesario para una partida.
      */
-    public GameScreen(Proyecto3Game game) {
+    public InGame(Proyecto3Game game) {
         this.game = game; // Guarda la referencia al gestor de pantallas
 
         // Reinicia el GameManager al empezar una nueva partida
@@ -79,16 +78,12 @@ public class GameScreen implements Screen {
 
         // Qué hacer si se elige "Vida"
         Runnable onHealthSelected = () -> {
-            player.applyHealthUpgrade();     // Aplica la mejora
-            GameManager.getInstance().resumeGame(); // Reanuda el juego
-            Gdx.input.setInputProcessor(null); // Devuelve el input al juego
+            OnHealthSelected();
         };
 
         // Qué hacer si se elige "Proyectil"
         Runnable onProjectileSelected = () -> {
-            player.applyProjectileUpgrade();  // Aplica la mejora
-            GameManager.getInstance().resumeGame(); // Reanuda el juego
-            Gdx.input.setInputProcessor(null); // Devuelve el input al juego
+            OnProjectileSelected();
         };
 
         // Instancia la UI pasándole las acciones
@@ -165,22 +160,7 @@ public class GameScreen implements Screen {
 
         // Dibujar Hitboxes (opcional)
         if (debugHitboxes) {
-            shapeRenderer.setProjectionMatrix(camController.getCamera().combined);
-            shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-            shapeRenderer.setColor(Color.RED);
-
-            Rectangle playerRect = player.getBounds();
-            shapeRenderer.rect(playerRect.x, playerRect.y, playerRect.width, playerRect.height);
-
-            for (Enemy e : enemyManager.getEnemies()) {
-                Rectangle eRect = e.getBounds();
-                shapeRenderer.rect(eRect.x, eRect.y, eRect.width, eRect.height);
-            }
-            for (Projectile p : projectiles) {
-                Rectangle pRect = p.getBounds();
-                shapeRenderer.rect(pRect.x, pRect.y, pRect.width, pRect.height);
-            }
-            shapeRenderer.end();
+            DebugHitboxes();
         }
 
         // Dibujar UI principal (corazones, exp) - (sin cámara)
@@ -263,6 +243,37 @@ public class GameScreen implements Screen {
                 break; // Solo nos golpea un enemigo a la vez
             }
         }
+    }
+
+    private void OnHealthSelected() {
+        player.applyHealthUpgrade();     // Aplica la mejora
+        GameManager.getInstance().resumeGame(); // Reanuda el juego
+        Gdx.input.setInputProcessor(null); // Devuelve el input al juego
+    }
+
+    private void OnProjectileSelected() {
+        player.applyProjectileUpgrade();  // Aplica la mejora
+        GameManager.getInstance().resumeGame(); // Reanuda el juego
+        Gdx.input.setInputProcessor(null); // Devuelve el input al juego
+    }
+
+    private void DebugHitboxes() {
+        shapeRenderer.setProjectionMatrix(camController.getCamera().combined);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        shapeRenderer.setColor(Color.RED);
+
+        Rectangle playerRect = player.getBounds();
+        shapeRenderer.rect(playerRect.x, playerRect.y, playerRect.width, playerRect.height);
+
+        for (Enemy e : enemyManager.getEnemies()) {
+            Rectangle eRect = e.getBounds();
+            shapeRenderer.rect(eRect.x, eRect.y, eRect.width, eRect.height);
+        }
+        for (Projectile p : projectiles) {
+            Rectangle pRect = p.getBounds();
+            shapeRenderer.rect(pRect.x, pRect.y, pRect.width, pRect.height);
+        }
+        shapeRenderer.end();
     }
 
     /**

@@ -9,18 +9,14 @@ import com.badlogic.gdx.math.Vector3;
 import java.util.List;
 import com.badlogic.gdx.math.MathUtils;
 
-public class Player {
+public class Player extends Character {
 
-    public Vector2 position;        // Posición del jugador (centro del sprite)
-    private float speed = 300f;     // Velocidad en píxeles por segundo
-    private float width = 35f;  // O el ancho real de tu sprite
-    private float height = 50f;
     private float shootDelay = 0.75f; // 0.2 segundos (5 disparos por segundo)
     private float shootTimer;
 
     public PlayerAnimation animation;
 
-    private int health;
+
     private int starterHealth = 1;
 
     private int currentExp;
@@ -32,15 +28,11 @@ public class Player {
     private float burstTimer;           // Temporizador para el burstDelay
     private int projectilesFiredInBurst; // Contador de cuántas balas hemos disparado en la ráfaga actual
 
-    private Vector2 startPosition;
-
     public Player(Vector2 startPos) {
-        this.position = startPos.cpy();
-        this.startPosition = startPos.cpy();
-
+        super(startPos);
         animation = new PlayerAnimation("player_spritesheet.png", 5, 4);
         this.shootTimer = 0f;
-        this.health = starterHealth;
+        this.speed = 250f;
         this.currentExp = 0;
         this.expToLevelUp = 10;
         this.expIncreaseAmount = 1;
@@ -52,6 +44,7 @@ public class Player {
         this.projectilesFiredInBurst = 0;
     }
 
+    @Override
     public void update(float delta) {
         boolean moved = false;
 
@@ -91,21 +84,16 @@ public class Player {
 
         shootTimer += delta;
         burstTimer += delta;
+
+
     }
 
+    @Override
     public void render(SpriteBatch batch) {
 
         animation.render(batch, position.x, position.y);
 
 
-    }
-
-    public Rectangle getBounds() {
-        // Centrado sobre el jugador
-        /*float x = position.x - hitboxWidth / 2f;
-        float y = position.y - hitboxHeight / 2f;
-        return new Rectangle(x, y, hitboxWidth, hitboxHeight);*/
-        return new Rectangle(position.x - width/2, position.y - height/2, width, height);
     }
 
     public void shoot(List<Projectile> projectiles, CameraController camera) {
@@ -143,12 +131,9 @@ public class Player {
         projectiles.add(new Projectile(startPos, direction));
     }
 
+    @Override
     public void dispose() {
         animation.dispose();
-    }
-
-    public Vector2 getPosition() {
-        return position.cpy(); // devuelve una copia segura de la posición
     }
 
     public int getHealth() {
@@ -180,21 +165,6 @@ public class Player {
 
     public int getExpToLevelUp() {
         return this.expToLevelUp;
-    }
-
-    public void takeDamage(int amount) {
-        this.health -= amount;
-        if (this.health < 0) {
-            this.health = 0;
-        }
-    }
-
-    public boolean isAlive() {
-        return this.health > 0;
-    }
-
-    public void resetPosition() {
-        this.position.set(startPosition);
     }
 
     public void applyHealthUpgrade() {
