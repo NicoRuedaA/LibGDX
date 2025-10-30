@@ -5,13 +5,13 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
-public class Level {
+public class Background {
 
     private Texture background;
     public static final float WORLD_WIDTH = 2000f;
     public static final float WORLD_HEIGHT = 2000f;
 
-    public Level() {
+    public Background() {
         // Cargar textura de fondo y repetir
         background = new Texture("background.png");
         background.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);

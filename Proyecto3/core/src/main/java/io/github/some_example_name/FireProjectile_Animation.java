@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array; // Importante: el Array de LibGDX
 
-public class ProjectileAnimation {
+public class FireProjectile_Animation {
 
     // Almacenamos las dos texturas para poder liberarlas (dispose)
     private Texture frame1;
@@ -17,7 +17,7 @@ public class ProjectileAnimation {
     private float stateTime;
 
     // El constructor ahora está vacío, hace todo el trabajo internamente
-    public ProjectileAnimation() {
+    public FireProjectile_Animation() {
 
         // 1. Cargar las dos texturas por separado
         frame1 = new Texture(Gdx.files.internal("fireball1.png"));

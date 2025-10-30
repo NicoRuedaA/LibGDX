@@ -16,19 +16,13 @@ public abstract class Character {
     protected int health;
     protected float width;
     protected float height;
+    protected float size;
 
     //constructor
     public Character(Vector2 startPos) {
         // Hacemos copias (.cpy()) para que el vector original no se modifique
         this.position = startPos.cpy();
         this.startPosition = startPos.cpy();
-    }
-
-    /**
-     * Devuelve la Hitbox (rectángulo de colisión) centrada.
-     */
-    public Rectangle getBounds() {
-        return new Rectangle(position.x - width / 2, position.y - height / 2, width, height);
     }
 
     /**
@@ -42,10 +36,10 @@ public abstract class Character {
     }
 
     /**
-     * Comprueba si el personaje sigue vivo.
+     * Devuelve la Hitbox (rectángulo de colisión) centrada.
      */
-    public boolean isAlive() {
-        return this.health > 0;
+    public Rectangle getBounds() {
+        return new Rectangle(position.x - width / 2, position.y - height / 2, width, height);
     }
 
     /**
@@ -57,15 +51,20 @@ public abstract class Character {
     }
 
     /**
+     * Comprueba si el personaje sigue vivo.
+     */
+    public boolean isAlive() {
+        return this.health > 0;
+    }
+
+
+    // --- Métodos Comunes (Abstractos) ---
+    /**
      * Devuelve una copia segura de la posición actual.
      */
     public Vector2 getPosition() {
         return position.cpy();
     }
-
-    // --- Métodos Comunes (Abstractos) ---
-    // Métodos que Player y Enemy DEBEN implementar, pero lo hacen de forma diferente.
-
     /**
      * Actualiza la lógica del personaje (movimiento, IA, etc.).
      * @param delta Tiempo desde el último fotograma.

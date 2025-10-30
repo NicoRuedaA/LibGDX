@@ -8,8 +8,6 @@ import java.util.List;
 
 public class EnemyManager {
 
-    protected static final int NUMBER_OF_DIFFERENT_ENEMIES = 4;
-
     public enum EnemyType {
         GRUNT,  // El normal
         SCOUT,
@@ -18,7 +16,11 @@ public class EnemyManager {
         // (Puedes añadir más aquí: TANK, SHOOTER, etc.)
     }
 
+    EnemyType[] allTypes = EnemyType.values();
     private List<Enemy> enemies;
+    private static final float MIN_SPAWN_DISTANCE = 300f;
+    private Vector2 tempSpawnPosition = new Vector2();
+
     private int screenWidth, screenHeight;
 
     public EnemyManager(int screenWidth, int screenHeight) {
@@ -27,36 +29,31 @@ public class EnemyManager {
         enemies = new ArrayList<>();
     }
 
-    public void spawnEnemy() {
-        // 1. Elige una posición aleatoria (esto ya lo tenías)
-        float x = MathUtils.random(0, screenWidth);
-        float y = MathUtils.random(0, screenHeight);
+    public void spawnEnemy(Vector2 playerPosition) {
+        float x = 0;
+        float y = 0;
+        float distance = 0;
+        do {
+            // a. Elige una posición aleatoria (como antes)
+            x = MathUtils.random(0, screenWidth);
+            y = MathUtils.random(0, screenHeight);
 
-        // --- 2. ¡NUEVA LÓGICA! Elige un tipo de enemigo al azar ---
+            // b. Ponemos la posición en nuestro vector temporal
+            tempSpawnPosition.set(x, y);
+
+            // c. Calculamos la distancia desde el spawn al jugador
+            //    .dst() es la abreviatura de "distance" (distancia)
+            distance = tempSpawnPosition.dst(playerPosition);
+
+            // d. Si la distancia es MENOR que la segura,
+            //    el bucle se repite (vuelve a tirar).
+        } while (distance < MIN_SPAWN_DISTANCE);
+
+
         EnemyType typeToSpawn;
+        int newRandom = MathUtils.random(0, allTypes.length - 1);
+        typeToSpawn = allTypes[newRandom];
 
-        int newRandom = MathUtils.random(0, 3);
-
-        switch (newRandom) {
-            case 0:
-            default:
-                typeToSpawn = EnemyType.GRUNT;
-                break;
-            case 1:
-                typeToSpawn = EnemyType.SCOUT;
-                break;
-            case 2:
-                typeToSpawn = EnemyType.TYPE3;
-                break;
-            case 3:
-                typeToSpawn = EnemyType.TYPE4;
-                break;
-
-        }
-
-        // --- FIN DE LA LÓGICA DE SPAWN ---
-
-        // 3. Llama al nuevo constructor de Enemigo
         enemies.add(new Enemy(x, y, typeToSpawn));
     }
 
@@ -80,12 +77,6 @@ public class EnemyManager {
         return enemies;
     }
 
-    public void dispose() {
-        for (Enemy e : enemies) {
-            e.dispose();
-        }
-    }
-
     public void clearAll() {
         // Primero, liberamos la memoria de cada enemigo
         for (Enemy e : enemies) {
@@ -93,5 +84,11 @@ public class EnemyManager {
         }
         // Luego, vaciamos la lista
         enemies.clear();
+    }
+
+    public void dispose() {
+        for (Enemy e : enemies) {
+            e.dispose();
+        }
     }
 }

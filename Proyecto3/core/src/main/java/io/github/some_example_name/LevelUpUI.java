@@ -26,13 +26,14 @@ public class LevelUpUI {
     // Texturas para los botones
     private Texture heartTexture;
     private Texture projectileTexture;
+    private Texture energyBallTexture;
 
     /**
      * Constructor que crea la UI.
      * @param onHealthSelected Callback (función) que se ejecuta al elegir "Vida".
      * @param onProjectileSelected Callback (función) que se ejecuta al elegir "Proyectil".
      */
-    public LevelUpUI(Runnable onHealthSelected, Runnable onProjectileSelected) {
+    public LevelUpUI(Runnable onHealthSelected, Runnable onProjectileSelected, Runnable onEnergyBallSelected) {
         stage = new Stage(new ScreenViewport());
 
         // 1. Cargar la Skin (para la fuente y el fondo)
@@ -48,6 +49,7 @@ public class LevelUpUI {
         try {
             heartTexture = new Texture(Gdx.files.internal("heart.png")); // O 'heart.png'
             projectileTexture = new Texture(Gdx.files.internal("fireball1.png"));
+            energyBallTexture = new Texture(Gdx.files.internal("electroball.png"));
         } catch (Exception e) {
             Gdx.app.error("LevelUpUI", "No se pudieron cargar las texturas de los botones");
             return;
@@ -56,6 +58,8 @@ public class LevelUpUI {
         // 3. Crear los Botones con Imagen
         ImageButton healthButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(heartTexture)));
         ImageButton projectileButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(projectileTexture)));
+        ImageButton energyBallButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(energyBallTexture)));
+
 
         // 4. Añadir Listeners (qué pasa al hacer clic)
         healthButton.addListener(new ChangeListener() {
@@ -72,6 +76,13 @@ public class LevelUpUI {
             }
         });
 
+        energyBallButton.addListener(new ChangeListener() { // 👈 Nuevo
+            public void changed(ChangeEvent event, Actor actor) {
+                onEnergyBallSelected.run();
+            }
+        });
+
+
         // 5. Crear la Tabla para organizar la UI
         Table table = new Table();
         table.setFillParent(true);
@@ -83,12 +94,13 @@ public class LevelUpUI {
         table.setBackground(bgStyle.background);
 
         // Añadir Título
-        table.add(new Label("¡NIVEL ALCANZADO!", skin)).colspan(2).padBottom(40);
+        table.add(new Label("¡NIVEL ALCANZADO!", skin)).colspan(3).padBottom(40);
         table.row();
 
         // Añadir Botones
         table.add(healthButton).pad(20);
         table.add(projectileButton).pad(20);
+        table.add(energyBallButton).pad(20);
 
         stage.addActor(table);
     }

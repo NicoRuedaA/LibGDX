@@ -6,28 +6,26 @@ package io.github.some_example_name;
  */
 public class GameManager {
 
-    // 1. El enum de estado que antes estaba en GameScreen
     public enum GameState {
+        START_MENU,
         RUNNING,
         PAUSED_LEVELUP
         // En el futuro: PAUSED_BY_USER, GAME_OVER, etc.
     }
 
-    // 2. La instancia única (Singleton)
     private static GameManager instance;
 
-    // 3. El estado actual
     private GameState currentState;
 
     /**
      * El constructor es privado para que nadie más pueda crearlo.
      */
     private GameManager() {
-        this.currentState = GameState.RUNNING; // El juego empieza corriendo
+        this.currentState = GameState.START_MENU; // El juego empieza corriendo
     }
 
     /**
-     * El método estático para obtener la única instancia.
+     * Método estático para obtener la única instancia.
      */
     public static GameManager getInstance() {
         if (instance == null) {
@@ -35,8 +33,6 @@ public class GameManager {
         }
         return instance;
     }
-
-    // --- MÉTODOS PÚBLICOS (La "API" de tu manager) ---
 
     /**
      * Comprueba si el juego debe estar actualizándose.
