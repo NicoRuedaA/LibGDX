@@ -8,6 +8,6 @@ public class PowerUp_MoreProjectiles implements PowerUpEffect {
     // Solo añade 'InGame game' al método
     @Override
     public void apply(InGame game, Player player) {
-        player.applyHealthUpgrade();
+        player.applyProjectileUpgrade();
     }
 }

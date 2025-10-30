@@ -1,84 +1,104 @@
 package io.github.some_example_name;
 
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.utils.Array;
+
+import io.github.some_example_name.Player.PlayerState;
 
 public class PlayerAnimation {
 
+    // --- AHORA SOLO 6 ANIMACIONES ---
+    private Animation<TextureRegion> walkDown, walkLeft, walkUp;
+    private Animation<TextureRegion> attackDown, attackLeft, attackUp;
+
     private Texture sheet;
-    private Animation<TextureRegion> walkUp, walkDown, walkSide;
-    private TextureRegion currentFrame;
-    private float stateTime;
 
-    private String direction = "DOWN"; // Dirección inicial
+    // --- DEFINICIONES DE COLUMNAS ACTUALIZADAS ---
+    private final int[] WALK_COLS = {0, 1};
+    private final int[] ATTACK_COLS = {2, 3};
 
-    private int frameCols = 5; // columnas en el spritesheet
-    private int frameRows = 4; // filas en el spritesheet
+    // --- FILAS (SIN ROW_RIGHT) ---
+    private final int ROW_DOWN = 0;
+    private final int ROW_LEFT = 1;
+    private final int ROW_UP = 2;
+    // private final int ROW_RIGHT = 3; // <-- Eliminada
 
     public PlayerAnimation(String filePath, int frameCols, int frameRows) {
-        this.frameCols = frameCols;
-        this.frameRows = frameRows;
         sheet = new Texture(Gdx.files.internal(filePath));
-
-        // Dividir el spritesheet en una matriz 2D de frames
-        TextureRegion[][] tmp = TextureRegion.split(
-            sheet,
+        TextureRegion[][] tmp = TextureRegion.split(sheet,
             sheet.getWidth() / frameCols,
-            sheet.getHeight() / frameRows
-        );
+            sheet.getHeight() / frameRows);
 
-        // 🔹 Crear animaciones usando SOLO los 2 primeros frames de cada fila relevante
-        walkDown = createAnimationFromRow(tmp, 0, 2); // Fila 0 → abajo
-        walkSide = createAnimationFromRow(tmp, 1, 2); // Fila 1 → izquierda/derecha
-        walkUp   = createAnimationFromRow(tmp, 2, 2); // Fila 2 → arriba
+        // --- Cargar animaciones de caminar (en bucle) ---
+        walkDown   = createAnimation(tmp, ROW_DOWN,  WALK_COLS, 0.2f, Animation.PlayMode.LOOP);
+        walkLeft   = createAnimation(tmp, ROW_LEFT,  WALK_COLS, 0.2f, Animation.PlayMode.LOOP);
+        walkUp     = createAnimation(tmp, ROW_UP,    WALK_COLS, 0.2f, Animation.PlayMode.LOOP);
+        // walkRight  = ...; // <-- Eliminada
 
-        stateTime = 0f;
-        currentFrame = tmp[0][0]; // frame inicial
+        // --- Cargar animaciones de ataque (NO en bucle) ---
+        attackDown = createAnimation(tmp, ROW_DOWN,  ATTACK_COLS, 0.1f, Animation.PlayMode.NORMAL);
+        attackLeft = createAnimation(tmp, ROW_LEFT,  ATTACK_COLS, 0.1f, Animation.PlayMode.NORMAL);
+        attackUp   = createAnimation(tmp, ROW_UP,    ATTACK_COLS, 0.1f, Animation.PlayMode.NORMAL);
+        // attackRight= ...; // <-- Eliminada
     }
 
-    private Animation<TextureRegion> createAnimationFromRow(TextureRegion[][] tmp, int row, int usedCols) {
-        TextureRegion[] frames = new TextureRegion[usedCols];
-        for (int i = 0; i < usedCols; i++) {
-            frames[i] = tmp[row][i];
+    private Animation<TextureRegion> createAnimation(TextureRegion[][] tmp, int row, int[] cols, float frameDuration, Animation.PlayMode playMode) {
+        Array<TextureRegion> frames = new Array<>();
+        for (int col : cols) {
+            frames.add(tmp[row][col]);
         }
-        return new Animation<>(0.2f, frames); // duración de frame ajustable
+        return new Animation<>(frameDuration, frames, playMode);
     }
 
-    public void update(float delta) {
-        stateTime += delta;
+    /**
+     * El método principal.
+     * --- MODIFICADO: "RIGHT" ahora devuelve la animación "LEFT" ---
+     */
+    public TextureRegion getFrame(PlayerState state, String direction, float stateTime) {
+        Animation<TextureRegion> anim = null;
 
-        switch (direction) {
-            case "UP":
-                currentFrame = walkUp.getKeyFrame(stateTime, true);
+        switch (state) {
+            case ATTACKING:
+                switch (direction) {
+                    case "UP":    anim = attackUp;    break;
+                    case "LEFT":  anim = attackLeft;  break;
+                    case "RIGHT": anim = attackLeft;  break; // <-- CAMBIO
+                    default:      anim = attackDown;  break;
+                }
                 break;
-            case "DOWN":
-                currentFrame = walkDown.getKeyFrame(stateTime, true);
+
+            case WALKING:
+                switch (direction) {
+                    case "UP":    anim = walkUp;    break;
+                    case "LEFT":  anim = walkLeft;  break;
+                    case "RIGHT": anim = walkLeft;  break; // <-- CAMBIO
+                    default:      anim = walkDown;  break;
+                }
                 break;
-            case "LEFT":
-                currentFrame = walkSide.getKeyFrame(stateTime, true);
-                break;
-            case "RIGHT":
-                // Mismo sprite que LEFT pero volteado horizontalmente
-                currentFrame = new TextureRegion(walkSide.getKeyFrame(stateTime, true));
-                currentFrame.flip(true, false);
-                break;
+
+            case IDLE:
+            default:
+                switch (direction) {
+                    case "UP":    anim = walkUp;    break;
+                    case "LEFT":  anim = walkLeft;  break;
+                    case "RIGHT": anim = walkLeft;  break; // <-- CAMBIO
+                    default:      anim = walkDown;  break;
+                }
+                return anim.getKeyFrame(0, false);
         }
+        return anim.getKeyFrame(stateTime, (state == PlayerState.WALKING));
     }
 
-    public void render(SpriteBatch batch, float x, float y) {
-        float width = 100;
-        float height = 100;
-        batch.draw(currentFrame, x - width / 2, y - height / 2, width, height);
-    }
-
-    public void setDirection(String dir) {
-        if (!dir.equals(direction)) {
-            direction = dir;
-            stateTime = 0f; // reinicia animación al cambiar de dirección
-        }
+    /**
+     * Devuelve la duración total de la animación de ataque.
+     */
+    public float getAttackAnimationDuration() {
+        // Usamos attackLeft (o cualquier otra) ya que asumimos que todas duran lo mismo
+        return attackLeft.getAnimationDuration();
     }
 
     public void dispose() {
