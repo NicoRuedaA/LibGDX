@@ -16,6 +16,8 @@ public abstract class Character {
     protected int health;
     protected float width;
     protected float height;
+    protected float hitboxWidth;
+    protected float hitboxHeight;
     protected float size;
 
     //constructor
@@ -39,7 +41,7 @@ public abstract class Character {
      * Devuelve la Hitbox (rectángulo de colisión) centrada.
      */
     public Rectangle getBounds() {
-        return new Rectangle(position.x - width / 2, position.y - height / 2, width, height);
+        return new Rectangle(position.x - hitboxWidth / 2, position.y - hitboxHeight / 2, hitboxWidth, hitboxHeight);
     }
 
     /**

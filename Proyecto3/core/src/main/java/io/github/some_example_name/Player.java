@@ -63,7 +63,9 @@ public class Player extends Character {
         this.speed = 250f;
         this.width = 100f;
         this.height = 100f;
-        this.size = 50f;
+        this.hitboxWidth = 40f;   // 👈 EDITA ESTO
+        this.hitboxHeight = 40f;
+        //this.size = 50f;
         this.health = 1;
 
         // Stats de nivel
@@ -100,6 +102,12 @@ public class Player extends Character {
         // Acumulamos el tiempo que llevamos en el estado actual
         stateTime += delta;
 
+        boolean moved = inputManager.hasMoved();
+        Vector2 direction = inputManager.getMovementDirection();
+
+        position.x += direction.x * speed * delta;
+        position.y += direction.y * speed * delta;
+
         // --- 3. LÓGICA DE LA MÁQUINA DE ESTADOS ---
 
         // El estado de ataque tiene prioridad y bloquea el movimiento
@@ -113,11 +121,9 @@ public class Player extends Character {
         } else {
             // Si no estamos atacando (estamos IDLE o WALKING), procesamos el movimiento
 
-            boolean moved = inputManager.hasMoved();
-            Vector2 direction = inputManager.getMovementDirection();
 
-            position.x += direction.x * speed * delta;
-            position.y += direction.y * speed * delta;
+
+
 
             // Actualiza el estado y la dirección (IDLE o WALKING)
             if (moved) {

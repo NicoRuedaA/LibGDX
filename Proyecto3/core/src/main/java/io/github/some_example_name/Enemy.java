@@ -43,6 +43,8 @@ public class Enemy extends Character {
                 this.health = 1;   // Más débil
                 this.width = 50f;
                 this.height = 50f;
+                this.hitboxHeight = 50f;
+                this.hitboxWidth = 50f;
                 this.size = 100f;
                 // Asumimos que usa una hoja de sprites diferente
                 animation = new EnemyAnimation("enemy2_spritesheet.png", 5, 4);
