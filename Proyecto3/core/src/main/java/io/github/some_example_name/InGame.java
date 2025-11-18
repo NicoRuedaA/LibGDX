@@ -15,6 +15,10 @@ import java.util.Iterator;
 import java.util.List;
 
 import io.github.some_example_name.PowerUp.*;
+import io.github.some_example_name.LevelUpUI.PowerUpOption;
+import java.util.List;
+import java.util.ArrayList;
+import io.github.some_example_name.LevelUpUI.PowerUpOption;
 import io.github.some_example_name.ElectroballProjectile;
 
 /**
@@ -39,7 +43,6 @@ public class InGame implements Screen {
     private EnemyManager enemyManager;
     private CameraController camController;
     private InputManager inputManager;
-    private PowerUpEffect arcShotUpgrade;
 
     // --- UI ---
     private UIManager uiManager;
@@ -50,10 +53,6 @@ public class InGame implements Screen {
     private boolean debugHitboxes = false;
     private float spawnTimer;
     private float spawnInterval = 0.5f;
-
-    private PowerUpEffect healthUpgrade;
-    private PowerUpEffect projectileUpgrade;
-    private PowerUpEffect energyBallUpgrade;
 
     private List<ElectroballProjectile> activeElectroballs;
 
@@ -88,32 +87,9 @@ public class InGame implements Screen {
         // Temporizador de spawn
         spawnTimer = 0f;
 
-        healthUpgrade = new PowerUp_MoreHealth();
-        projectileUpgrade = new PowerUp_MoreProjectiles();
-        energyBallUpgrade = new PowerUp_EnergyBall();
-        arcShotUpgrade = new PowerUp_ArcShot();
-
-        // Qué hacer si se elige "Vida"
-        Runnable onHealthSelected = () -> {
-            OnHealthSelected();
-        };
-
-        // Qué hacer si se elige "Proyectil"
-        Runnable onProjectileSelected = () -> {
-            OnProjectileSelected();
-        };
-
-        Runnable onEnergyBallSelected = () -> { // 👈 Crea la nueva receta
-            OnEnergyBallSelected();
-        };
-
-        Runnable onArcShotSelected = () -> { // 👈 Crea la nueva receta
-            OnArcShotSelected();
-        };
 
         // Instancia la UI pasándole las acciones
         // --- ¡LÍNEA CORREGIDA! ---
-        levelUpUI = new LevelUpUI(onHealthSelected, onProjectileSelected, onEnergyBallSelected, onArcShotSelected);
         activeElectroballs = new ArrayList<>();
     }
 
@@ -131,8 +107,10 @@ public class InGame implements Screen {
 
             if (inputManager.didPressLevelUpDebug()) {
                 // Pausa el juego y muestra la UI de nivel
-                GameManager.getInstance().pauseForLevelUp();
-                Gdx.input.setInputProcessor(levelUpUI.getStage());
+               // GameManager.getInstance().pauseForLevelUp();
+                //Gdx.input.setInputProcessor(levelUpUI.getStage());
+
+                showLevelUpMenu();
             }
 
             // Lógica de Spawn
@@ -236,7 +214,7 @@ public class InGame implements Screen {
 
     // --- ¡MÉTODO AÑADIDO! ---
     private void OnArcShotSelected() {
-        arcShotUpgrade.apply(this, player); // Llama al efecto
+        //arcShotUpgrade.apply(this, player); // Llama al efecto
         resumeGameFromLevelUp(); // Reanuda el juego
     }
 
@@ -255,6 +233,34 @@ public class InGame implements Screen {
             //player.shoot(isShooting, projectiles, camController);
         }
     }
+    private void showLevelUpMenu() {
+        // 1. Limpiar la UI anterior si existe (para no gastar memoria)
+        if (levelUpUI != null) {
+            levelUpUI.dispose();
+        }
+
+        List<LevelUpUI.PowerUpOption> options = new ArrayList<>();
+
+        // 3. ¡Pedir 3 NUEVOS aleatorios al Registro!
+        List<PowerUpEffect> effectsToShow = PowerUpRegistry.getRandomPowerups(3);
+
+        // 4. Crear las acciones (el bucle mágico)
+        for (PowerUpEffect effect : effectsToShow) {
+            Runnable action = () -> {
+                effect.apply(this, player);
+                resumeGameFromLevelUp();
+            };
+            options.add(new LevelUpUI.PowerUpOption(effect, action));
+        }
+
+        // 5. Crear la UI con las nuevas opciones
+        levelUpUI = new LevelUpUI(options);
+    GameManager.getInstance().pauseForLevelUp();
+
+    // B. ¡Dar el control del ratón a la UI! (Sin esto, los botones no funcionan)
+        Gdx.input.setInputProcessor(levelUpUI.getStage());
+    }
+
 
     /**
      * Gestiona colisiones entre proyectiles y enemigos.
@@ -279,8 +285,9 @@ public class InGame implements Screen {
                         // Comprueba si el jugador sube de nivel
                         if (player.addExp(1)) {
                             // Pausa el juego y da el control a la UI de level up
-                            GameManager.getInstance().pauseForLevelUp();
-                            Gdx.input.setInputProcessor(levelUpUI.getStage());
+                            //GameManager.getInstance().pauseForLevelUp();
+                            //Gdx.input.setInputProcessor(levelUpUI.getStage());
+                            showLevelUpMenu();
                         }
                     }
 
@@ -365,21 +372,6 @@ public class InGame implements Screen {
         }
     }
 
-    private void OnHealthSelected() {
-        healthUpgrade.apply(this, player); // Pasa 'this' (InGame)
-        resumeGameFromLevelUp();
-    }
-
-    private void OnProjectileSelected() {
-        projectileUpgrade.apply(this, player); // Pasa 'this' (InGame)
-        resumeGameFromLevelUp();
-    }
-
-    private void OnEnergyBallSelected() {
-        // 1. Aplica la lógica de la MEJORA
-        energyBallUpgrade.apply(this, player); // Pasa 'this' (InGame)
-        resumeGameFromLevelUp();
-    }
 
     public void spawnElectroballProjectile(Character target) {
         activeElectroballs.add(new ElectroballProjectile(target));
@@ -444,7 +436,9 @@ public class InGame implements Screen {
     public void resize(int width, int height) {
         // Actualiza la cámara y la UI si la ventana cambia de tamaño
         camController.resize(width, height);
-        levelUpUI.getStage().getViewport().update(width, height, true);
+        if (levelUpUI != null) {
+            levelUpUI.getStage().getViewport().update(width, height, true);
+        }
     }
 
     @Override
@@ -473,7 +467,9 @@ public class InGame implements Screen {
         player.dispose();
         enemyManager.dispose();
         uiManager.dispose();
-        levelUpUI.dispose();
+        if (levelUpUI != null) {
+            levelUpUI.dispose();
+        }
         powerupManager.dispose();
 
         // Libera proyectiles restantes

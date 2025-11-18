@@ -13,4 +13,8 @@ public class PowerUp_EnergyBall implements PowerUpEffect {
 
         Gdx.app.log("PowerUp_ElectroBall", "¡ElectroBall activada!");
     }
+
+    public String getTexturePath() {
+        return "electroball.png"; // <-- ¡Aquí definimos su icono!
+    }
 }

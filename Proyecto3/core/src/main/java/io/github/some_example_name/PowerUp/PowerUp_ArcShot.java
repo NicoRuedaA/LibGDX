@@ -13,4 +13,11 @@ public class PowerUp_ArcShot implements PowerUpEffect {
 
         Gdx.app.log("PowerUp_ArcShot", "¡Mejora de Arco activada!");
     }
+
+    public String getTexturePath() {
+        return "fireball1.png"; // <-- ¡Aquí definimos su icono!
+    }
+
+
+
 }

@@ -10,4 +10,8 @@ public class PowerUp_MoreHealth implements PowerUpEffect {
     public void apply(InGame game, Player player) {
         player.applyHealthUpgrade();
     }
+
+    public String getTexturePath() {
+        return "heart.png"; // <-- ¡Aquí definimos su icono!
+    }
 }

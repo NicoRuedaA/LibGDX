@@ -3,12 +3,13 @@ package io.github.some_example_name.PowerUp;
 import io.github.some_example_name.InGame;
 import io.github.some_example_name.Player;
 
-public class PowerUp_MoreProjectiles implements PowerUpEffect {
-
-    // Solo añade 'InGame game' al método
+public class PowerUp_Speed implements PowerUpEffect {
     @Override
     public void apply(InGame game, Player player) {
-        player.applyProjectileUpgrade();
+        // El PowerUp solo sabe QUE debe subir la velocidad
+        // El Player sabe COMO subirla
+        player.increaseSpeed(50);
+        System.out.println("¡Velocidad aumentada!");
     }
 
     public String getTexturePath() {

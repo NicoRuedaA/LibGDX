@@ -229,6 +229,14 @@ public class Player extends Character {
         Gdx.app.log("Player", "Mejora de Arco! Nivel de arco: " + spreadLevel);
     }
 
+    public void increaseSpeed(int x){
+        this.speed += x;
+    }
+
+    public void activateShield(){
+
+    }
+
     public boolean addExp(int amount) {
         this.currentExp += amount;
 
