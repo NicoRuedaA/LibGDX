@@ -16,9 +16,11 @@ import java.util.Iterator;
 import java.util.List;
 
 import io.github.catpire.PowerUp.*;
-import io.github.catpire.ElectroballProjectile;
+import com.badlogic.gdx.audio.Music;
 
 public class InGame implements Screen {
+
+    private Music bgMusic;
 
     private Main game;
     private PowerUpManager powerupManager;
@@ -68,6 +70,13 @@ public class InGame implements Screen {
 
         spawnTimer = 0f;
         activeElectroballs = new ArrayList<>();
+
+        // Cargar el archivo desde assets/music/bso.mp3
+        bgMusic = Gdx.audio.newMusic(Gdx.files.internal("music/bso.mp3"));
+
+        // Configuración inicial
+        bgMusic.setLooping(true); // Para que se repita infinitamente
+        bgMusic.setVolume(0.5f);  // Volumen al 50%
     }
 
     @Override
@@ -283,14 +292,24 @@ public class InGame implements Screen {
         shapeRenderer.end();
     }
 
-    private void restartGame() { this.isGameOver = true; }
+    private void restartGame() {
+        if (bgMusic != null) {
+            bgMusic.stop();
+        }
+        this.isGameOver = true; }
 
     public void SpawnEnemy(){ enemyManager.spawnEnemy(player.getPosition()); }
 
-    @Override public void show() {}
+    @Override
+    public void show() {
+        // Se ejecuta al entrar a la pantalla InGame
+        if (bgMusic != null) {
+            bgMusic.play();
+        }
+    }
     @Override public void pause() {}
     @Override public void resume() {}
-    @Override public void hide() { dispose(); }
+ public void hide() {  }
 
     @Override
     public void dispose() {
@@ -304,5 +323,8 @@ public class InGame implements Screen {
         powerupManager.dispose();
         for (FireProjectile p : fireProjectiles) p.dispose();
         for(ElectroballProjectile ball : activeElectroballs) ball.dispose();
+        if (bgMusic != null) {
+            bgMusic.dispose(); // Libera la memoria (Muy importante)
+        }
     }
 }
